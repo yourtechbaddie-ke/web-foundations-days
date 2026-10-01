@@ -41,13 +41,31 @@ function render(notesToRender = notes) {
   });
 
   count.textContent =
-    notes.length === 1 ? "You have 1 note." : `You have ${notes.length} notes.`;
+    notes.length === 0
+      ? "You have 0 notes."
+      : notes.length === 1
+        ? "You have 1 note."
+        : `You have ${notes.length} notes.`;
 }
 
 function addNote(text, selectedCategory) {
+  const trimmedText = text.trim();
+
+  if (trimmedText === "") {
+    errorMessage.textContent = "Please type a note first.";
+    return;
+  }
+
+  if (trimmedText.length > 200) {
+    errorMessage.textContent = "Notes must be 200 characters or fewer.";
+    return;
+  }
+
+  errorMessage.textContent = "";
+
   const note = {
     id: Date.now(),
-    text: text.trim(),
+    text: trimmedText,
     category: selectedCategory,
     createdAt: new Date().toLocaleString(),
   };
@@ -56,6 +74,11 @@ function addNote(text, selectedCategory) {
   render();
   input.value = "";
   input.focus();
+}
+
+function deleteNote(id) {
+  notes = notes.filter((note) => note.id !== id);
+  render();
 }
 
 form.addEventListener("submit", (event) => {
