@@ -1,0 +1,151 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background: #f2f2f2;
+  color: #222;
+}
+
+header {
+  padding: 2rem 1rem;
+  text-align: center;
+  background: #222;
+  color: #fff;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+header p {
+  margin: 0.5rem 0 0;
+}
+
+main {
+  width: 90%;
+  max-width: 700px;
+  margin: 2rem auto;
+}
+
+section {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  padding: 0.7rem;
+  font: inherit;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+}
+
+button {
+  border: 0;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: #444;
+  transform: translateY(-1px);
+}
+
+#error-message {
+  min-height: 1.5em;
+  margin-bottom: 0;
+  color: #b00020;
+  font-weight: 600;
+}
+
+#search-input {
+  margin-bottom: 1rem;
+}
+
+#notes-list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.note-card {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.category-personal {
+  border-left: 5px solid #7b61ff;
+}
+
+.category-work {
+  border-left: 5px solid #e67e22;
+}
+
+.category-study {
+  border-left: 5px solid #2e8b57;
+}
+
+.note-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.note-category,
+.note-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.delete-btn {
+  width: auto;
+  margin-top: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  background: #8e0000;
+}
+
+.delete-btn:hover {
+  background: #6b0000;
+}
+
+@media (max-width: 600px) {
+  main {
+    width: 94%;
+    margin: 1rem auto;
+  }
+
+  section {
+    padding: 1rem;
+  }
+
+  form {
+    gap: 0.5rem;
+  }
+}
+
+footer {
+  padding: 1rem;
+  text-align: center;
+}
