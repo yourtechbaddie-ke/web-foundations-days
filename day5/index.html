@@ -7,30 +7,13 @@
     <script src="users.js" defer></script>
   </head>
   <body>
-    <header>
-      <h1>User Directory</h1>
-      <p>Load and filter users from a public API.</p>
-    </header>
+    <h1>User Directory</h1>
+    <button type="button" id="load-users">Load users</button>
 
-    <main>
-      <section>
-        <h2>Users</h2>
-        <button id="load-users" type="button">Load users</button>
+    <label for="filter-input">Filter by name</label>
+    <input type="text" id="filter-input" placeholder="e.g. Leanne" />
 
-        <label for="filter-input">Filter users by name</label>
-        <input
-          id="filter-input"
-          type="search"
-          placeholder="Type a name..."
-        />
-
-        <p id="status"></p>
-        <ul id="users-list"></ul>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; 2026 User Directory. Built during Web Foundations.</p>
-    </footer>
+    <p id="status"></p>
+    <ul id="users-list"></ul>
   </body>
 </html>
