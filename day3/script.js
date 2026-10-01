@@ -1,140 +1,52 @@
 // 1. Our data: an array of note objects
-let notes = [
-  { id: 1, text: "Revise HTML forms", category: "study" },
-  { id: 2, text: "Buy groceries", category: "personal" },
-  { id: 3, text: "Prepare project update", category: "work" },
-  { id: 4, text: "Practise JavaScript arrays", category: "study" },
-  { id: 5, text: "Call Mum", category: "personal" },
-];
+let notes = [];
 
-// 2. Search notes by text, ignoring upper and lower case
-function searchNotes(word) {
-  const searchTerm = word.toLowerCase();
-  return notes.filter((note) => note.text.toLowerCase().includes(searchTerm));
+// 2. Check that a note's text is acceptable
+function isValidNote(text) {
+  const cleaned = text.trim();
+  return cleaned.length > 0 && cleaned.length <= 200;
 }
 
-// 3. Find the note with the most characters
-function longestNote() {
-  if (notes.length === 0) return null;
-
-  return notes.reduce((longest, note) =>
-    note.text.length > longest.text.length ? note : longest
-  );
-}
-
-// 4. Count notes by category
-function countByCategory() {
-  const counts = {};
-
-  for (const note of notes) {
-    if (!counts[note.category]) {
-      counts[note.category] = 0;
-    }
-    counts[note.category]++;
-  }
-
-  return counts;
-}
-
-// 5. Create a friendly summary
-function getSummary() {
-  const counts = countByCategory();
-  const total = notes.length;
-  const noteWord = total === 1 ? "note" : "notes";
-
-  return `${total} ${noteWord}: ${counts.personal || 0} personal, ${counts.work || 0} work, ${counts.study || 0} study.`;
-}
-
-// 6. Check for duplicate text, ignoring case and extra spaces
-function isDuplicate(text) {
-  const cleanedText = text.trim().toLowerCase();
-
-  return notes.some((note) => note.text.trim().toLowerCase() === cleanedText);
-}
-
-// 7. Add a valid, non-duplicate note
-function addNote(text, category) {
-  const cleanedText = text.trim();
-  const validCategories = ["personal", "work", "study"];
-
-  if (cleanedText.length < 1 || cleanedText.length > 200) {
-    console.log("❌ Note rejected: text must be 1-200 characters.");
+// 3. Add a note (returns true if added, false if rejected)
+function addNote(text) {
+  if (!isValidNote(text)) {
+    console.log("❌ Note rejected: must be 1-200 characters.");
     return false;
   }
 
-  if (isDuplicate(cleanedText)) {
-    console.log("❌ Note rejected: duplicate note.");
-    return false;
-  }
-
-  if (!validCategories.includes(category)) {
-    console.log("❌ Note rejected: category must be personal, work, or study.");
-    return false;
-  }
-
-  notes.push({
+  const newNote = {
     id: Date.now(),
-    text: cleanedText,
-    category,
-  });
+    text: text.trim(),
+    createdAt: new Date().toLocaleString(),
+  };
 
-  console.log(`✅ Note added: "${cleanedText}"`);
+  notes.push(newNote);
+  console.log(`✅ Added: "${newNote.text}"`);
   return true;
 }
 
-// --- Tests: normal case and edge case for every function ---
+// 4. Delete a note by its id
+function deleteNote(id) {
+  notes = notes.filter((note) => note.id !== id);
+}
 
-console.log(searchNotes("HTML"));
-// Expected: [{ id: 1, text: "Revise HTML forms", category: "study" }]
-console.log(searchNotes("Python"));
-// Expected: []
+// 5. A friendly summary sentence
+function countMessage() {
+  if (notes.length === 0) return "You have no notes yet.";
+  if (notes.length === 1) return "You have 1 note.";
+  return `You have ${notes.length} notes.`;
+}
 
-console.log(longestNote());
-// Expected: { id: 4, text: "Practise JavaScript arrays", category: "study" }
-const savedNotes = notes;
-notes = [];
-console.log(longestNote());
-// Expected: null
-notes = savedNotes;
+// 6. Print all notes
+function listNotes() {
+  notes.forEach((note, index) => {
+    console.log(`${index + 1}. ${note.text} (${note.createdAt})`);
+  });
+  console.log(countMessage());
+}
 
-console.log(countByCategory());
-// Expected: { study: 2, personal: 2, work: 1 }
-notes = [{ id: 6, text: "Only personal note", category: "personal" }];
-console.log(countByCategory());
-// Expected: { personal: 1 }
-
-notes = [
-  { id: 1, text: "Revise HTML forms", category: "study" },
-  { id: 2, text: "Buy groceries", category: "personal" },
-  { id: 3, text: "Prepare project update", category: "work" },
-  { id: 4, text: "Practise JavaScript arrays", category: "study" },
-  { id: 5, text: "Call Mum", category: "personal" },
-];
-
-console.log(getSummary());
-// Expected: "5 notes: 2 personal, 1 work, 2 study."
-notes = [];
-console.log(getSummary());
-// Expected: "0 notes: 0 personal, 0 work, 0 study."
-
-notes = [
-  { id: 1, text: "Revise HTML forms", category: "study" },
-  { id: 2, text: "Buy groceries", category: "personal" },
-  { id: 3, text: "Prepare project update", category: "work" },
-  { id: 4, text: "Practise JavaScript arrays", category: "study" },
-  { id: 5, text: "Call Mum", category: "personal" },
-];
-
-console.log(isDuplicate("  revise html forms  "));
-// Expected: true
-console.log(isDuplicate("Learn CSS Grid"));
-// Expected: false
-
-console.log(addNote("Learn CSS Grid", "study"));
-// Expected: true
-console.log(addNote("  revise html forms  ", "study"));
-// Expected: false
-console.log(addNote("A", "other"));
-// Expected: false
-console.log(addNote("   ", "personal"));
-// Expected: false
+// --- Test it ---
+addNote("Revise HTML forms");
+addNote("   ");              // rejected
+addNote("Practise Flexbox");
+listNotes();
