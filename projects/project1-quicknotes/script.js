@@ -6,10 +6,36 @@ const count = document.querySelector("#note-count");
 const errorMessage = document.querySelector("#error-message");
 const searchInput = document.querySelector("#search-input");
 
-let notes = [];
+const STORAGE_KEY = "quicknotes-project1";
+
+let notes = loadNotes();
+
+function loadNotes() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (!saved) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(saved);
+  } catch {
+    return [];
+  }
+}
+
+function saveNotes() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
 
 function render(notesToRender = notes) {
   list.replaceChildren();
+
+  if (notesToRender.length === 0 && searchInput.value.trim() !== "") {
+    const emptyMessage = document.createElement("li");
+    emptyMessage.textContent = "No notes match your search.";
+    list.appendChild(emptyMessage);
+  }
 
   notesToRender.forEach((note) => {
     const li = document.createElement("li");
@@ -71,6 +97,7 @@ function addNote(text, selectedCategory) {
   };
 
   notes.push(note);
+  saveNotes();
   render();
   input.value = "";
   input.focus();
@@ -78,10 +105,26 @@ function addNote(text, selectedCategory) {
 
 function deleteNote(id) {
   notes = notes.filter((note) => note.id !== id);
+  saveNotes();
   render();
+}
+
+function searchNotes(query) {
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredNotes = notes.filter((note) =>
+    note.text.toLowerCase().includes(normalizedQuery)
+  );
+
+  render(filteredNotes);
 }
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   addNote(input.value, category.value);
 });
+
+searchInput.addEventListener("input", (event) => {
+  searchNotes(event.target.value);
+});
+
+render();
