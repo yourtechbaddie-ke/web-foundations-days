@@ -1,28 +1,31 @@
-# Project 1: Build QuickNotes
+# QuickNotes
 
-QuickNotes is a browser-based note-taking app built with HTML, CSS, and vanilla JavaScript. Users can create categorized notes, validate note length, delete notes, search note text, and keep their notes saved in the browser with localStorage.
+QuickNotes is a simple, fast note-taking web app built with plain HTML,
+CSS and JavaScript. Users can add notes with a category, search them,
+delete them, and their notes are saved in the browser so they are still
+there after a refresh.
 
 ## Features
 
-- Add notes with Personal, Work, or Study categories
-- Validate empty notes and notes longer than 200 characters
-- Display note cards with category labels and timestamps
-- Delete individual notes
-- Search notes by text, case-insensitively
-- Persist notes with localStorage
-- Show accurate zero, one, and many note counts
-- Responsive layout for small screens
+- Add notes with a category (Personal, Work, Study)
+- Colour-coded note cards showing category and date
+- Validation for empty and over-long notes (max 200 characters)
+- Delete single notes or clear all notes (with confirmation)
+- Live search that filters notes as you type
+- Notes saved with localStorage
+- Responsive layout for phones and laptops
 
-## Run locally
+## How to Run Locally
 
-1. Open the `projects/project1-quicknotes/` folder in your code editor.
-2. Open `index.html` directly in a browser, or use a local development server such as VS Code Live Server.
-3. Add notes, search them, delete them, and refresh the page to verify persistence.
+1. Clone the repository:
+   `git clone https://github.com/your-username/quicknotes-app.git`
+2. Open the folder in VS Code.
+3. Right-click `index.html` and choose **Open with Live Server**.
 
-## What I learned
+## What I Learned
 
-- How to structure a small application with semantic HTML and accessible form controls.
-- How to use Flexbox, responsive CSS, and category-specific classes to style a responsive interface.
-- How to manage application state with JavaScript arrays and rebuild the DOM using `createElement` and `textContent`.
-- How to validate input and handle form, delete, and search events.
-- How to persist structured data with `localStorage`, `JSON.stringify`, and `JSON.parse`.
+- How to structure a page with semantic HTML and accessible forms
+- How the CSS box model, Flexbox and media queries work together
+- How to store app data as an array of objects and render it to the DOM
+- Why `textContent` is safer than `innerHTML` for user input
+- How to save and load data with localStorage and JSON
