@@ -1,73 +1,66 @@
-const API_URL = "https://jsonplaceholder.typicode.com/users";
+const USERS_URL = "https://jsonplaceholder.typicode.com/users";
 
-const loadButton = document.querySelector("#load-users");
+const loadBtn = document.querySelector("#load-users");
 const filterInput = document.querySelector("#filter-input");
 const statusText = document.querySelector("#status");
-const usersList = document.querySelector("#users-list");
+const list = document.querySelector("#users-list");
 
-let users = [];
+let users = []; // filled once by loadUsers()
 
-function renderUsers(list) {
-  usersList.replaceChildren();
+function renderUsers(usersToShow) {
+  list.innerHTML = "";
 
-  if (list.length === 0) {
-    const emptyMessage = document.createElement("li");
-    emptyMessage.textContent = "No users match your filter.";
-    usersList.appendChild(emptyMessage);
+  if (usersToShow.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = users.length
+      ? "No users match your filter."
+      : "No users loaded yet.";
+    list.appendChild(li);
     return;
   }
 
-  list.forEach((user) => {
+  usersToShow.forEach((user) => {
     const li = document.createElement("li");
 
     const name = document.createElement("strong");
     name.textContent = user.name;
 
-    const email = document.createElement("span");
-    email.textContent = ` — ${user.email}`;
+    const details = document.createElement("p");
+    details.textContent =
+      `${user.email} · ${user.address.city} · ${user.company.name}`;
 
-    const city = document.createElement("span");
-    city.textContent = ` — ${user.address.city}`;
-
-    const company = document.createElement("span");
-    company.textContent = ` — ${user.company.name}`;
-
-    li.append(name, email, city, company);
-    usersList.appendChild(li);
+    li.append(name, details);
+    list.appendChild(li);
   });
 }
 
 async function loadUsers() {
   statusText.textContent = "Loading users...";
-  loadButton.disabled = true;
+  loadBtn.disabled = true;
 
   try {
-    const response = await fetch(API_URL);
-
+    const response = await fetch(USERS_URL);
     if (!response.ok) {
-      throw new Error(`Status ${response.status}`);
+      throw new Error(`Server responded with status ${response.status}`);
     }
-
     users = await response.json();
     renderUsers(users);
     statusText.textContent = `Loaded ${users.length} users.`;
   } catch (error) {
-    users = [];
-    usersList.replaceChildren();
-    statusText.textContent = "Could not load users. Please try again.";
     console.error(error);
+    statusText.textContent = "Could not load users. Please try again.";
   } finally {
-    loadButton.disabled = false;
+    loadBtn.disabled = false;
   }
 }
 
-loadButton.addEventListener("click", loadUsers);
-
-filterInput.addEventListener("input", (event) => {
-  const query = event.target.value.trim().toLowerCase();
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(query)
+function applyFilter() {
+  const text = filterInput.value.trim().toLowerCase();
+  const matches = users.filter((user) =>
+    user.name.toLowerCase().includes(text)
   );
+  renderUsers(matches);
+}
 
-  renderUsers(filteredUsers);
-});
+loadBtn.addEventListener("click", loadUsers);
+filterInput.addEventListener("input", applyFilter);
