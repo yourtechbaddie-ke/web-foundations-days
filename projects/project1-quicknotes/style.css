@@ -1,4 +1,3 @@
-/* ===== 1. Variables & reset ===== */
 :root {
   --red: #8e0000;
   --teal: #0ba184;
@@ -10,9 +9,7 @@
 
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -38,15 +35,8 @@ header {
   padding: 28px 16px;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 2.2rem;
-}
-
-.tagline {
-  margin: 4px 0 0;
-  opacity: 0.9;
-}
+header h1 { margin: 0; font-size: 2.2rem; }
+.tagline { margin: 4px 0 0; opacity: 0.9; }
 
 footer {
   text-align: center;
@@ -69,10 +59,7 @@ main {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.card h2 {
-  margin-top: 0;
-  color: var(--red);
-}
+.card h2 { margin-top: 0; color: var(--red); }
 
 #note-form {
   display: flex;
@@ -94,15 +81,8 @@ main {
   font-size: 1rem;
 }
 
-#note-input {
-  flex: 1;
-  min-width: 0;
-}
-
-#search-input {
-  width: 100%;
-  margin-bottom: 8px;
-}
+#note-input { flex: 1; min-width: 0; }
+#search-input { width: 100%; margin-bottom: 8px; }
 
 #error-message {
   color: var(--red);
@@ -122,9 +102,7 @@ button {
   transition: background 0.2s;
 }
 
-button:hover {
-  background: #088a70;
-}
+button:hover { background: #088a70; }
 
 .delete-btn {
   background: var(--red);
@@ -132,22 +110,16 @@ button:hover {
   font-size: 0.85rem;
 }
 
-.delete-btn:hover {
-  background: #6b0000;
-}
+.delete-btn:hover { background: #6b0000; }
 
 .secondary-btn {
   background: #e5e7eb;
   color: var(--text);
 }
 
-.secondary-btn:hover {
-  background: #d1d5db;
-}
+.secondary-btn:hover { background: #d1d5db; }
 
-#note-count {
-  color: var(--muted);
-}
+#note-count { color: var(--muted); }
 
 #notes-list {
   list-style: none;
@@ -168,19 +140,9 @@ button:hover {
   margin-bottom: 10px;
 }
 
-.note-body {
-  flex: 1;
-  overflow-wrap: anywhere;
-}
-
-.note-text {
-  margin: 0 0 4px;
-}
-
-.note-meta {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
+.note-body { flex: 1; overflow-wrap: anywhere; }
+.note-text { margin: 0 0 4px; }
+.note-meta { font-size: 0.8rem; color: var(--muted); }
 
 .badge {
   display: inline-block;
@@ -192,12 +154,12 @@ button:hover {
 }
 
 .category-personal { border-left-color: var(--teal); }
-.category-work     { border-left-color: var(--red); }
-.category-study    { border-left-color: var(--blue); }
+.category-work { border-left-color: var(--red); }
+.category-study { border-left-color: var(--blue); }
 
 .category-personal .badge { background: var(--teal); }
-.category-work .badge     { background: var(--red); }
-.category-study .badge    { background: var(--blue); }
+.category-work .badge { background: var(--red); }
+.category-study .badge { background: var(--blue); }
 
 .empty-message {
   color: var(--muted);
@@ -206,16 +168,7 @@ button:hover {
 }
 
 @media (max-width: 600px) {
-  #note-form {
-    flex-direction: column;
-  }
-
-  .note {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  header h1 {
-    font-size: 1.8rem;
-  }
+  #note-form { flex-direction: column; }
+  .note { flex-direction: column; align-items: flex-start; }
+  header h1 { font-size: 1.8rem; }
 }
