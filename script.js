@@ -4,48 +4,70 @@ const categoryInput = document.querySelector("#note-category");
 const list = document.querySelector("#notes-list");
 const count = document.querySelector("#note-count");
 const errorMessage = document.querySelector("#error-message");
+const searchInput = document.querySelector("#search-input");
 
-let notes = [];
+const STORAGE_KEY = "quicknotes";
+let notes = loadNotes();
 
-function render() {
+function loadNotes() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  try {
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveNotes() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
+
+function render(notesToRender = notes) {
   list.textContent = "";
 
-  notes.forEach((note) => {
-    const li = document.createElement("li");
-    li.classList.add("note", `category-${note.category.toLowerCase()}`);
+  if (notesToRender.length === 0 && searchInput.value.trim() !== "") {
+    const emptyMessage = document.createElement("li");
+    emptyMessage.textContent = "No notes match your search.";
+    list.appendChild(emptyMessage);
+  } else {
+    notesToRender.forEach((note) => {
+      const li = document.createElement("li");
+      li.classList.add("note", `category-${note.category.toLowerCase()}`);
 
-    const content = document.createElement("div");
-    content.classList.add("note-content");
+      const content = document.createElement("div");
+      content.classList.add("note-content");
 
-    const details = document.createElement("div");
+      const details = document.createElement("div");
 
-    const category = document.createElement("span");
-    category.classList.add("note-category");
-    category.textContent = note.category;
+      const category = document.createElement("span");
+      category.classList.add("note-category");
+      category.textContent = note.category;
 
-    const text = document.createElement("p");
-    text.classList.add("note-text");
-    text.textContent = note.text;
+      const text = document.createElement("p");
+      text.classList.add("note-text");
+      text.textContent = note.text;
 
-    const date = document.createElement("p");
-    date.classList.add("note-meta");
-    date.textContent = note.createdAt;
+      const date = document.createElement("p");
+      date.classList.add("note-meta");
+      date.textContent = note.createdAt;
 
-    details.appendChild(category);
-    details.appendChild(text);
-    details.appendChild(date);
+      details.appendChild(category);
+      details.appendChild(text);
+      details.appendChild(date);
 
-    const del = document.createElement("button");
-    del.type = "button";
-    del.classList.add("delete-btn");
-    del.textContent = "Delete";
-    del.addEventListener("click", () => deleteNote(note.id));
+      const del = document.createElement("button");
+      del.type = "button";
+      del.classList.add("delete-btn");
+      del.textContent = "Delete";
+      del.addEventListener("click", () => deleteNote(note.id));
 
-    content.appendChild(details);
-    content.appendChild(del);
-    li.appendChild(content);
-    list.appendChild(li);
-  });
+      content.appendChild(details);
+      content.appendChild(del);
+      li.appendChild(content);
+      list.appendChild(li);
+    });
+  }
 
   count.textContent =
     notes.length === 0
@@ -64,12 +86,24 @@ function addNote(text, category) {
   };
 
   notes.push(newNote);
-  render();
+  saveNotes();
+  render(getFilteredNotes());
 }
 
 function deleteNote(id) {
   notes = notes.filter((note) => note.id !== id);
-  render();
+  saveNotes();
+  render(getFilteredNotes());
+}
+
+function getFilteredNotes() {
+  const query = searchInput.value.trim().toLowerCase();
+
+  if (!query) {
+    return notes;
+  }
+
+  return notes.filter((note) => note.text.toLowerCase().includes(query));
 }
 
 form.addEventListener("submit", (event) => {
@@ -92,6 +126,10 @@ form.addEventListener("submit", (event) => {
 
   input.value = "";
   input.focus();
+});
+
+searchInput.addEventListener("input", () => {
+  render(getFilteredNotes());
 });
 
 render();
