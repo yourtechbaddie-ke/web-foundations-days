@@ -1,65 +1,71 @@
-const noteText = document.getElementById("note-text");
-const charCount = document.getElementById("char-count");
-const wordCount = document.getElementById("word-count");
-const clearBtn = document.getElementById("clear-btn");
-const themeToggle = document.getElementById("theme-toggle");
+// ---------- 1. Select the elements we need ----------
+const form = document.querySelector("#note-form");
+const input = document.querySelector("#note-input");
+const list = document.querySelector("#notes-list");
+const count = document.querySelector("#note-count");
 
-const DRAFT_KEY = "quick-notes-draft";
-const THEME_KEY = "quick-notes-theme";
+const STORAGE_KEY = "quicknotes";
 
-function updateCounts() {
-  const text = noteText.value;
-  const characters = text.length;
-  const trimmedText = text.trim();
-  const words = trimmedText === "" ? 0 : trimmedText.split(/\s+/).length;
+// ---------- 2. Load saved notes (or start empty) ----------
+let notes = loadNotes();
 
-  charCount.textContent = `${characters} / 200 characters`;
-  wordCount.textContent = `${words} words`;
-
-  charCount.classList.toggle("warning", characters > 180 && characters <= 200);
-  charCount.classList.toggle("over", characters > 200);
+function loadNotes() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  return saved ? JSON.parse(saved) : [];
 }
 
-function clearNote() {
-  noteText.value = "";
-  updateCounts();
-  localStorage.removeItem(DRAFT_KEY);
-  noteText.focus();
+function saveNotes() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
 }
 
-function updateThemeButton() {
-  themeToggle.textContent = document.body.classList.contains("dark")
-    ? "Light mode"
-    : "Dark mode";
+// ---------- 3. Draw the notes on the page ----------
+function render() {
+  list.innerHTML = "";
+
+  notes.forEach((note) => {
+    const li = document.createElement("li");
+    li.classList.add("note");
+
+    const text = document.createElement("span");
+    text.textContent = note.text;
+
+    const del = document.createElement("button");
+    del.textContent = "Delete";
+    del.classList.add("delete-btn");
+    del.addEventListener("click", () => deleteNote(note.id));
+
+    li.appendChild(text);
+    li.appendChild(del);
+    list.appendChild(li);
+  });
+
+  count.textContent =
+    notes.length === 1 ? "You have 1 note." : `You have ${notes.length} notes.`;
 }
 
-noteText.addEventListener("input", () => {
-  updateCounts();
-  localStorage.setItem(DRAFT_KEY, noteText.value);
+// ---------- 4. Add and delete ----------
+function addNote(text) {
+  notes.push({ id: Date.now(), text: text });
+  saveNotes();
+  render();
+}
+
+function deleteNote(id) {
+  notes = notes.filter((note) => note.id !== id);
+  saveNotes();
+  render();
+}
+
+// ---------- 5. Listen for the form ----------
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = input.value.trim();
+  if (text === "") return;
+
+  addNote(text);
+  input.value = "";
+  input.focus();
 });
 
-clearBtn.addEventListener("click", clearNote);
-
-noteText.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    clearNote();
-  }
-});
-
-themeToggle.addEventListener("click", () => {
-  const isDark = document.body.classList.toggle("dark");
-  localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
-  updateThemeButton();
-});
-
-const savedDraft = localStorage.getItem(DRAFT_KEY);
-if (savedDraft !== null) {
-  noteText.value = savedDraft;
-}
-
-if (localStorage.getItem(THEME_KEY) === "dark") {
-  document.body.classList.add("dark");
-}
-
-updateCounts();
-updateThemeButton();
+// ---------- 6. Draw once when the page first loads ----------
+render();
