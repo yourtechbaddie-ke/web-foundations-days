@@ -3,6 +3,7 @@ const input = document.querySelector("#note-input");
 const categoryInput = document.querySelector("#note-category");
 const list = document.querySelector("#notes-list");
 const count = document.querySelector("#note-count");
+const errorMessage = document.querySelector("#error-message");
 
 let notes = [];
 
@@ -38,6 +39,7 @@ function render() {
     del.type = "button";
     del.classList.add("delete-btn");
     del.textContent = "Delete";
+    del.addEventListener("click", () => deleteNote(note.id));
 
     content.appendChild(details);
     content.appendChild(del);
@@ -65,10 +67,27 @@ function addNote(text, category) {
   render();
 }
 
+function deleteNote(id) {
+  notes = notes.filter((note) => note.id !== id);
+  render();
+}
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const text = input.value.trim();
+
+  if (text === "") {
+    errorMessage.textContent = "Please type a note first.";
+    return;
+  }
+
+  if (text.length > 200) {
+    errorMessage.textContent = "Notes must be 200 characters or fewer.";
+    return;
+  }
+
+  errorMessage.textContent = "";
   addNote(text, categoryInput.value);
 
   input.value = "";
