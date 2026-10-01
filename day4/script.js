@@ -1,71 +1,82 @@
-// ---------- 1. Select the elements we need ----------
-const form = document.querySelector("#note-form");
-const input = document.querySelector("#note-input");
-const list = document.querySelector("#notes-list");
-const count = document.querySelector("#note-count");
+// ---------- 1. Find the page controls ----------
+const draftField = document.querySelector("#note-text");
+const characterDisplay = document.querySelector("#char-count");
+const wordDisplay = document.querySelector("#word-count");
+const clearButton = document.querySelector("#clear-btn");
+const themeButton = document.querySelector("#theme-toggle");
 
-const STORAGE_KEY = "quicknotes";
+const MAX_CHARS = 200;
+const WARNING_LIMIT = 180;
+const DRAFT_STORAGE = "note-draft";
+const THEME_STORAGE = "theme";
 
-// ---------- 2. Load saved notes (or start empty) ----------
-let notes = loadNotes();
-
-function loadNotes() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  return saved ? JSON.parse(saved) : [];
+// ---------- 2. Count words and refresh the counters ----------
+function getWordCount(value) {
+  const cleaned = value.trim();
+  return cleaned === "" ? 0 : cleaned.split(/\s+/).length;
 }
 
-function saveNotes() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+function refreshCounters() {
+  const value = draftField.value;
+  const characters = value.length;
+  const words = getWordCount(value);
+
+  characterDisplay.textContent = `${characters} / ${MAX_CHARS} characters`;
+  wordDisplay.textContent = words === 1 ? "1 word" : `${words} words`;
+
+  characterDisplay.classList.remove("warning", "over");
+
+  if (characters > MAX_CHARS) {
+    characterDisplay.classList.add("over");
+  } else if (characters > WARNING_LIMIT) {
+    characterDisplay.classList.add("warning");
+  }
 }
 
-// ---------- 3. Draw the notes on the page ----------
-function render() {
-  list.innerHTML = "";
-
-  notes.forEach((note) => {
-    const li = document.createElement("li");
-    li.classList.add("note");
-
-    const text = document.createElement("span");
-    text.textContent = note.text;
-
-    const del = document.createElement("button");
-    del.textContent = "Delete";
-    del.classList.add("delete-btn");
-    del.addEventListener("click", () => deleteNote(note.id));
-
-    li.appendChild(text);
-    li.appendChild(del);
-    list.appendChild(li);
-  });
-
-  count.textContent =
-    notes.length === 1 ? "You have 1 note." : `You have ${notes.length} notes.`;
+// ---------- 3. Save and clear the draft ----------
+function storeDraft() {
+  localStorage.setItem(DRAFT_STORAGE, draftField.value);
 }
 
-// ---------- 4. Add and delete ----------
-function addNote(text) {
-  notes.push({ id: Date.now(), text: text });
-  saveNotes();
-  render();
+function clearDraft() {
+  draftField.value = "";
+  localStorage.removeItem(DRAFT_STORAGE);
+  refreshCounters();
+  draftField.focus();
 }
 
-function deleteNote(id) {
-  notes = notes.filter((note) => note.id !== id);
-  saveNotes();
-  render();
+// ---------- 4. Apply and switch the theme ----------
+function setTheme(theme) {
+  const darkMode = theme === "dark";
+  document.body.classList.toggle("dark", darkMode);
+  themeButton.textContent = darkMode ? "Light mode" : "Dark mode";
 }
 
-// ---------- 5. Listen for the form ----------
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const text = input.value.trim();
-  if (text === "") return;
+function switchTheme() {
+  const nextTheme = document.body.classList.contains("dark")
+    ? "light"
+    : "dark";
 
-  addNote(text);
-  input.value = "";
-  input.focus();
+  setTheme(nextTheme);
+  localStorage.setItem(THEME_STORAGE, nextTheme);
+}
+
+// ---------- 5. Respond to user actions ----------
+draftField.addEventListener("input", () => {
+  refreshCounters();
+  storeDraft();
 });
 
-// ---------- 6. Draw once when the page first loads ----------
-render();
+draftField.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    clearDraft();
+  }
+});
+
+clearButton.addEventListener("click", clearDraft);
+themeButton.addEventListener("click", switchTheme);
+
+// ---------- 6. Restore saved draft and theme ----------
+draftField.value = localStorage.getItem(DRAFT_STORAGE) || "";
+setTheme(localStorage.getItem(THEME_STORAGE) || "light");
+refreshCounters();
