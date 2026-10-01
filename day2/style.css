@@ -1,0 +1,160 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background: #f4f4f4;
+  color: #222;
+}
+
+header {
+  padding: 2rem;
+  text-align: center;
+  background: #222;
+  color: #fff;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+header p {
+  margin: 0.5rem 0 1.25rem;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+nav a:hover {
+  background: #fff;
+  color: #222;
+}
+
+main {
+  width: 90%;
+  max-width: 900px;
+  margin: 2rem auto;
+}
+
+main > h2,
+main > p {
+  text-align: center;
+}
+
+section {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.features li {
+  padding: 1rem;
+  background: #f4f4f4;
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #bbb;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+th {
+  background: #eee;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+form p {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.7rem;
+  font: inherit;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+button {
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 4px;
+  background: #222;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: #444;
+  transform: translateY(-1px);
+}
+
+footer {
+  padding: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  header {
+    padding: 1.25rem;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  main {
+    width: 94%;
+    margin: 1rem auto;
+  }
+
+  section {
+    padding: 1rem;
+  }
+}
