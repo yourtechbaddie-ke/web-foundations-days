@@ -1,72 +1,42 @@
-# Library API Design
+# Library API - Books Resource
 
-A REST API for managing a library's books resource.
+Base URL: https://api.citylibrary.org/v1
+All requests and responses use JSON.
 
 ## Endpoints
 
-### 1. List all books
+### List all books
+- GET /books
+- Returns an array of books.
+- Success: 200 OK
 
-- **Method:** GET
-- **Path:** `/books`
-- **Description:** Returns a list of all books in the library.
-- **Success status:** `200 OK`
-- **Example request:** `GET /books`
+### Get one book
+- GET /books/{id}
+- Example: GET /books/15
+- Success: 200 OK
 
-### 2. Get one book
+### Create a book
+- POST /books
+- Body: { "title": "Things Fall Apart", "author": "Chinua Achebe",
+          "year": 1958, "copies": 3 }
+- Success: 201 Created (returns the new book with its id)
 
-- **Method:** GET
-- **Path:** `/books/:id`
-- **Description:** Returns the book with the specified ID.
-- **Success status:** `200 OK`
-- **Example request:** `GET /books/42`
+### Update a book
+- PATCH /books/{id}
+- Body (only the fields to change): { "copies": 5 }
+- Success: 200 OK
 
-### 3. Create a book
+### Delete a book
+- DELETE /books/{id}
+- Success: 204 No Content
 
-- **Method:** POST
-- **Path:** `/books`
-- **Description:** Creates a new book in the library.
-- **Example request body:**
-  ```json
-  {
-    "title": "Things Fall Apart",
-    "author": "Chinua Achebe",
-    "publishedYear": 1958
-  }
-  ```
-- **Success status:** `201 Created`
+### List books by an author
+- GET /books?author=Chinua%20Achebe
+- Uses a query parameter to filter the list.
+- Success: 200 OK
 
-### 4. Update a book
+## Errors
 
-- **Method:** PUT
-- **Path:** `/books/:id`
-- **Description:** Replaces the book with updated information.
-- **Example request body:**
-  ```json
-  {
-    "title": "Things Fall Apart",
-    "author": "Chinua Achebe",
-    "publishedYear": 1958
-  }
-  ```
-- **Success status:** `200 OK`
-
-### 5. Delete a book
-
-- **Method:** DELETE
-- **Path:** `/books/:id`
-- **Description:** Removes the specified book from the library.
-- **Success status:** `204 No Content`
-- **Example request:** `DELETE /books/42`
-
-### 6. List books by author
-
-- **Method:** GET
-- **Path:** `/books?author=:author`
-- **Description:** Returns books whose author matches the supplied query parameter.
-- **Success status:** `200 OK`
-- **Example request:** `GET /books?author=Chinua%20Achebe`
-
-## Error codes
-
-- **400 Bad Request:** The request is invalid, such as creating a book without the required `title` or `author` fields.
-- **404 Not Found:** The requested book does not exist, such as requesting `GET /books/9999` when no book has that ID.
+- 400 Bad Request - the body is invalid, for example POST /books
+  without a title, or "year" is text instead of a number.
+- 404 Not Found - the book does not exist, for example GET /books/99999.
