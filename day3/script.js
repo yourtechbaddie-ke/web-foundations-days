@@ -1,52 +1,99 @@
-// 1. Our data: an array of note objects
-let notes = [];
+let notes = [
+  { id: 1, text: "Buy milk and bread", category: "personal" },
+  { id: 2, text: "Finish the Day 3 assignment", category: "study" },
+  { id: 3, text: "Email the project report to Grace", category: "work" },
+  { id: 4, text: "Revise JavaScript arrays", category: "study" },
+  { id: 5, text: "Call mum", category: "personal" },
+];
 
-// 2. Check that a note's text is acceptable
-function isValidNote(text) {
-  const cleaned = text.trim();
-  return cleaned.length > 0 && cleaned.length <= 200;
+const VALID_CATEGORIES = ["personal", "work", "study"];
+
+function searchNotes(term) {
+  const query = term.toLowerCase();
+  return notes.filter((note) => note.text.toLowerCase().includes(query));
 }
 
-// 3. Add a note (returns true if added, false if rejected)
-function addNote(text) {
-  if (!isValidNote(text)) {
-    console.log("❌ Note rejected: must be 1-200 characters.");
+function longestNote() {
+  if (notes.length === 0) return null;
+  let result = notes[0];
+
+  for (let index = 1; index < notes.length; index++) {
+    if (notes[index].text.length > result.text.length) {
+      result = notes[index];
+    }
+  }
+
+  return result;
+}
+
+function countByCategory() {
+  const totals = { personal: 0, work: 0, study: 0 };
+
+  for (const note of notes) {
+    totals[note.category] += 1;
+  }
+
+  return totals;
+}
+
+function getSummary() {
+  const totals = countByCategory();
+  const label = notes.length === 1 ? "note" : "notes";
+
+  return notes.length + " " + label + ": " +
+    totals.personal + " personal, " +
+    totals.work + " work, " +
+    totals.study + " study.";
+}
+
+function isDuplicate(text) {
+  const target = text.trim().toLowerCase();
+  return notes.some((note) => note.text.trim().toLowerCase() === target);
+}
+
+function addNote(text, category) {
+  const value = text.trim();
+
+  if (value.length === 0 || value.length > 200) {
+    console.log("Rejected: a note must be 1-200 characters.");
     return false;
   }
 
-  const newNote = {
-    id: Date.now(),
-    text: text.trim(),
-    createdAt: new Date().toLocaleString(),
-  };
+  if (isDuplicate(value)) {
+    console.log('Rejected: "' + value + '" already exists.');
+    return false;
+  }
 
-  notes.push(newNote);
-  console.log(`✅ Added: "${newNote.text}"`);
+  if (!VALID_CATEGORIES.includes(category)) {
+    console.log('Rejected: "' + category + '" is not a valid category.');
+    return false;
+  }
+
+  notes.push({
+    id: Date.now(),
+    text: value,
+    category: category,
+  });
+
+  console.log('Added: "' + value + '" (' + category + ")");
   return true;
 }
 
-// 4. Delete a note by its id
-function deleteNote(id) {
-  notes = notes.filter((note) => note.id !== id);
-}
+// ---------- Tests ----------
+console.log(searchNotes("revise"));
+console.log(searchNotes("BREAD"));
+console.log(searchNotes("holiday"));
 
-// 5. A friendly summary sentence
-function countMessage() {
-  if (notes.length === 0) return "You have no notes yet.";
-  if (notes.length === 1) return "You have 1 note.";
-  return `You have ${notes.length} notes.`;
-}
+console.log(longestNote().text);
 
-// 6. Print all notes
-function listNotes() {
-  notes.forEach((note, index) => {
-    console.log(`${index + 1}. ${note.text} (${note.createdAt})`);
-  });
-  console.log(countMessage());
-}
+console.log(countByCategory());
+console.log(getSummary());
 
-// --- Test it ---
-addNote("Revise HTML forms");
-addNote("   ");              // rejected
-addNote("Practise Flexbox");
-listNotes();
+console.log(isDuplicate("  call MUM "));
+console.log(isDuplicate("Call dad"));
+
+console.log(addNote("Read chapter 4", "study"));
+console.log(addNote("call mum", "personal"));
+console.log(addNote("   ", "work"));
+console.log(addNote("Plan trip", "holiday"));
+console.log(getSummary());
