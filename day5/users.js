@@ -8,7 +8,7 @@ const list = document.querySelector("#users-list");
 let users = []; // filled once by loadUsers()
 
 function renderUsers(usersToShow) {
-  list.innerHTML = "";
+  list.replaceChildren();
 
   if (usersToShow.length === 0) {
     const li = document.createElement("li");
