@@ -92,7 +92,7 @@ function render() {
     note.text.toLowerCase().includes(query)
   );
 
-  list.innerHTML = "";
+  list.replaceChildren();
 
   if (notes.length > 0 && visibleNotes.length === 0) {
     const empty = document.createElement("li");
