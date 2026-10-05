@@ -30,7 +30,9 @@ function countByCategory() {
   const totals = { personal: 0, work: 0, study: 0 };
 
   for (const note of notes) {
-    if (Object.prototype.hasOwnProperty.call(totals, note.category)) {\n      totals[note.category] += 1;\n    }
+    if (Object.prototype.hasOwnProperty.call(totals, note.category)) {
+      totals[note.category] += 1;
+    }
   }
 
   return totals;
