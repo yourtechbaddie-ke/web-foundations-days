@@ -9,7 +9,7 @@ let notes = [
 const VALID_CATEGORIES = ["personal", "work", "study"];
 
 function searchNotes(term) {
-  const query = term.toLowerCase();
+  const query = term.trim().toLowerCase();
   return notes.filter((note) => note.text.toLowerCase().includes(query));
 }
 
@@ -30,7 +30,7 @@ function countByCategory() {
   const totals = { personal: 0, work: 0, study: 0 };
 
   for (const note of notes) {
-    totals[note.category] += 1;
+    if (Object.prototype.hasOwnProperty.call(totals, note.category)) {\n      totals[note.category] += 1;\n    }
   }
 
   return totals;
