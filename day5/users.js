@@ -43,7 +43,11 @@ async function loadUsers() {
     if (!response.ok) {
       throw new Error(`Server responded with status ${response.status}`);
     }
-    users = await response.json();
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+      throw new Error("Unexpected user data.");
+    }
+    users = data;
     renderUsers(users);
     statusText.textContent = `Loaded ${users.length} users.`;
   } catch (error) {
