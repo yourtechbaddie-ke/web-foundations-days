@@ -20,7 +20,8 @@ function loadNotes() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return [];
   try {
-    return JSON.parse(saved);
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error("Saved notes were damaged. Starting fresh.", error);
     return [];
