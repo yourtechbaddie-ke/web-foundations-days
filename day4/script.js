@@ -78,5 +78,6 @@ themeButton.addEventListener("click", switchTheme);
 
 // ---------- 6. Restore saved draft and theme ----------
 draftField.value = localStorage.getItem(DRAFT_STORAGE) || "";
-setTheme(localStorage.getItem(THEME_STORAGE) || "light");
+const savedTheme = localStorage.getItem(THEME_STORAGE);
+setTheme(savedTheme === "dark" ? "dark" : "light");
 refreshCounters();
