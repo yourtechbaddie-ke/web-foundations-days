@@ -118,6 +118,8 @@ async function createNote(event) {
     });
 
     const note = await response.json();
+    const emptyState = notesList.querySelector(".empty-state");
+    if (emptyState) emptyState.remove();
     renderNote(note, true);
     setStatus(`Note created (status ${response.status}, id ${note.id}).`, "success");
     form.reset();
