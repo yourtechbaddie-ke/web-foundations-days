@@ -1,0 +1,7 @@
+# Day 8 Reflection
+
+The most difficult concept in the course was designing for correctness under concurrency, especially understanding how a system can prevent two users from buying the same seat at almost the same time. At first, it was tempting to rely on an application checking whether a seat was available before creating an order. I learned that this is not enough because two application servers can perform that check simultaneously. I overcame this by studying transactions, row-level locking, and database constraints, then applying them to the TicketHub design. The key lesson was that the database must be the final source of truth for operations where correctness matters.
+
+Based on the feedback from my earlier work, I would improve the capstone by making the traffic assumptions and capacity calculations even more explicit and by explaining more clearly which data can be cached safely and which data must always come from the transactional database. I would also make failure scenarios more detailed, especially payment retries and expired seat holds.
+
+Next, I want to learn more about production backend engineering: PostgreSQL performance and transactions, Redis, message queues, cloud deployment, observability, and distributed systems. I also want to build a working version of TicketHub so I can move from system-design diagrams and estimates to implementing APIs, database transactions, authentication, and payment workflows in code.
