@@ -57,39 +57,37 @@ The system is therefore **read-heavy**, so read caching and a read replica are i
 
     Client
       |
-      v
-    DNS
-      |
-      v
-    CDN
-      |
-      v
-    Load Balancer
-      |
-      +----------------+----------------+
-      |                |                |
-      v                v                v
-    App Server 1     App Server 2     App Server N
-      |                |                |
-      +----------------+----------------+
-                       |
-             +---------+----------+
-             |                    |
-             v                    v
-           Cache                Queue
-             |                    |
-             v                    v
-        Primary DB             Worker
-             |
-             | replication
-             v
-        Read Replica
+      +--------------------+
+      |                    |
+      v                    v
+    CDN                 Load Balancer
+    |                       |
+    |                       +----------------+----------------+
+    |                       |                |                |
+    |                       v                v                v
+    |                     App Server 1     App Server 2     App Server N
+    |                       |                |                |
+    |                       +----------------+----------------+
+    |                                        |
+    |                              +---------+----------+
+    |                              |                    |
+    |                              v                    v
+    |                            Cache                Queue
+    |                              |                    |
+    |                              v                    v
+    |                         Primary DB             Worker
+    |                              |
+    |                              | replication
+    |                              v
+    |                         Read Replica
+    |
+    +-- Static assets
 
 ## Component responsibilities
 
 - **Client:** Provides the user interface and sends authenticated API requests without exposing backend implementation details.
-- **DNS:** Resolves the public QuickNotes hostname to the service's entry point and supports controlled traffic routing.
-- **CDN:** Serves cacheable static assets close to users and reduces latency for repeated edge requests.
+- **DNS:** Resolves the public QuickNotes hostname to the service's entry point.
+- **CDN:** Serves cacheable static assets close to users and reduces latency for repeated static requests. API traffic is routed separately through the load balancer.
 - **Load balancer:** Distributes API traffic across healthy app servers and removes failed instances from rotation.
 - **App servers:** Execute authentication, authorization, validation and business logic while scaling horizontally.
 - **Cache:** Stores frequently requested note lists or metadata so repeated reads avoid unnecessary database work.
@@ -102,7 +100,7 @@ The system is therefore **read-heavy**, so read caching and a read replica are i
 
 1. The client sends GET /api/v1/notes.
 2. DNS resolves the QuickNotes hostname.
-3. The request reaches the CDN and any cacheable edge content is served there.
+3. The request reaches the load balancer.
 4. The load balancer selects a healthy app server.
 5. The app server authenticates the request and validates pagination parameters.
 6. The app server checks the cache for the user's requested note page.
@@ -114,7 +112,7 @@ The system is therefore **read-heavy**, so read caching and a read replica are i
 ## POST /notes flow
 
 1. The client sends POST /api/v1/notes with the title and optional body.
-2. DNS resolves the service and the request passes through the CDN and load balancer.
+2. DNS resolves the service and the request reaches the load balancer.
 3. A healthy app server authenticates the user and validates the request.
 4. The app server writes the new note to the primary database inside a transaction.
 5. The database returns the new note ID.
