@@ -17,9 +17,10 @@ async function request(url, options = {}) {
   const response = await fetch(url, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    }
+      Accept: "application/json",
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {}),
+    },
   });
 
   if (!response.ok) {
@@ -29,11 +30,11 @@ async function request(url, options = {}) {
   return response;
 }
 
-function renderEmptyState() {
+function renderEmptyState(message = "No notes found.") {
   notesList.replaceChildren();
   const empty = document.createElement("li");
-  empty.textContent = "No notes found.";
   empty.className = "empty-state";
+  empty.textContent = message;
   notesList.appendChild(empty);
 }
 
@@ -42,7 +43,7 @@ function renderNote(note, prepend = false) {
   item.className = "note";
 
   const title = document.createElement("h3");
-  title.textContent = note.title;
+  title.textContent = note.title || "Untitled note";
 
   const body = document.createElement("p");
   body.textContent = note.body || "No body provided.";
@@ -71,16 +72,18 @@ async function loadNotes() {
 
     notesList.replaceChildren();
 
-    if (notes.length === 0) {
+    if (!Array.isArray(notes) || notes.length === 0) {
       renderEmptyState();
-    } else {
-      notes.forEach((note) => renderNote(note));
+      setStatus("No notes were returned by the server.", "success");
+      return;
     }
 
+    notes.forEach((note) => renderNote(note));
     setStatus(`Loaded ${notes.length} notes from the server.`, "success");
   } catch (error) {
+    console.error(error);
+    renderEmptyState("Unable to load notes.");
     setStatus("Sorry, we could not load the notes. Please try again.", "error");
-    renderEmptyState();
   } finally {
     loadBtn.disabled = false;
   }
@@ -110,21 +113,19 @@ async function createNote(event) {
   try {
     const response = await request(API_URL, {
       method: "POST",
-      body: JSON.stringify({
-        title,
-        body,
-        userId: 1
-      })
+      body: JSON.stringify({ title, body, userId: 1 }),
     });
 
     const note = await response.json();
+
     const emptyState = notesList.querySelector(".empty-state");
     if (emptyState) emptyState.remove();
 
     renderNote(note, true);
-    setStatus(`Note created (status ${response.status}, id ${note.id}).`, "success");
+    setStatus(`Note created successfully (201 Created, id ${note.id}).`, "success");
     form.reset();
   } catch (error) {
+    console.error(error);
     setStatus("Sorry, we could not create the note. Please try again.", "error");
   } finally {
     submitBtn.disabled = false;
@@ -136,16 +137,17 @@ async function deleteNote(id, item, button) {
   setStatus("Deleting note...", "loading");
 
   try {
-    // JSONPlaceholder accepts DELETE requests but does not permanently store mutations.
-    await request(`${API_URL}/${id}`, { method: "DELETE" });
-    item.remove();
+    const response = await request(`${API_URL}/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
 
-    if (!notesList.querySelector(".note")) {
-      renderEmptyState();
+    if (response.ok) {
+      item.remove();
+      if (!notesList.querySelector(".note")) renderEmptyState();
+      setStatus(`Note ${id} deleted successfully (204 No Content).`, "success");
     }
-
-    setStatus(`Note ${id} deleted successfully.`, "success");
   } catch (error) {
+    console.error(error);
     setStatus("Sorry, we could not delete the note. Please try again.", "error");
   } finally {
     button.disabled = false;
