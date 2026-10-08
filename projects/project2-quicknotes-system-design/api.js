@@ -15,10 +15,6 @@ function setStatus(message, type = "") {
 
 async function request(url, options = {}) {
   const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -140,6 +136,7 @@ async function deleteNote(id, item, button) {
   setStatus("Deleting note...", "loading");
 
   try {
+    // JSONPlaceholder accepts DELETE requests but does not permanently store mutations.
     await request(`${API_URL}/${id}`, { method: "DELETE" });
     item.remove();
 
