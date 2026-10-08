@@ -18,7 +18,13 @@
         <h2>Add a note</h2>
         <form id="note-form">
           <label for="note-input">New note</label>
-          <input type="text" id="note-input" placeholder="What do you want to remember?" autocomplete="off" />
+          <input
+            type="text"
+            id="note-input"
+            maxlength="200"
+            placeholder="What do you want to remember?"
+            autocomplete="off"
+          />
           <label for="note-category" class="visually-hidden">Category</label>
           <select id="note-category">
             <option value="personal">Personal</option>
