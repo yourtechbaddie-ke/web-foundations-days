@@ -1,6 +1,4 @@
-// =====================================================
-// QuickNotes - Project 1 Solution
-// =====================================================
+// QuickNotes - Project 1
 
 const form = document.querySelector("#note-form");
 const input = document.querySelector("#note-input");
@@ -13,6 +11,7 @@ const clearAllBtn = document.querySelector("#clear-all");
 
 const STORAGE_KEY = "quicknotes";
 const MAX_LENGTH = 200;
+const VALID_CATEGORIES = new Set(["personal", "work", "study"]);
 
 let notes = loadNotes();
 
@@ -22,20 +21,34 @@ function loadNotes() {
 
   try {
     const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.error("Saved notes were damaged. Starting fresh.", error);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter((note) =>
+      note &&
+      (typeof note.id === "number" || typeof note.id === "string") &&
+      typeof note.text === "string" &&
+      typeof note.createdAt === "string" &&
+      VALID_CATEGORIES.has(note.category)
+    );
+  } catch {
     return [];
   }
 }
 
 function saveNotes() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    return true;
+  } catch {
+    showError("Your note was changed, but it could not be saved on this device.");
+    return false;
+  }
 }
 
-function validate(text) {
-  if (text === "") return "Please type a note first.";
+function validate(text, category) {
+  if (!text) return "Please type a note first.";
   if (text.length > MAX_LENGTH) return "Notes must be 200 characters or fewer.";
+  if (!VALID_CATEGORIES.has(category)) return "Please choose a valid category.";
   return "";
 }
 
@@ -49,20 +62,17 @@ function capitalise(word) {
 
 function countMessage(total) {
   if (total === 0) return "You have no notes yet.";
-  if (total === 1) return "You have 1 note.";
-  return `You have ${total} notes.`;
+  return total === 1 ? "You have 1 note." : `You have ${total} notes.`;
 }
 
 function noteTime(note) {
-  if (typeof note.createdAt === "number") return note.createdAt;
-
-  const parsed = Date.parse(note.createdAt);
-  return Number.isNaN(parsed) ? 0 : parsed;
+  const time = Date.parse(note.createdAt);
+  return Number.isNaN(time) ? 0 : time;
 }
 
 function displayDate(value) {
   const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString();
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
 }
 
 function createNoteElement(note) {
@@ -70,17 +80,17 @@ function createNoteElement(note) {
   li.classList.add("note", `category-${note.category}`);
 
   const body = document.createElement("div");
-  body.classList.add("note-body");
+  body.className = "note-body";
 
   const text = document.createElement("p");
-  text.classList.add("note-text");
+  text.className = "note-text";
   text.textContent = note.text;
 
   const meta = document.createElement("div");
-  meta.classList.add("note-meta");
+  meta.className = "note-meta";
 
   const badge = document.createElement("span");
-  badge.classList.add("badge");
+  badge.className = "badge";
   badge.textContent = capitalise(note.category);
 
   const date = document.createElement("span");
@@ -91,8 +101,9 @@ function createNoteElement(note) {
 
   const del = document.createElement("button");
   del.type = "button";
-  del.classList.add("delete-btn");
+  del.className = "delete-btn";
   del.textContent = "Delete";
+  del.setAttribute("aria-label", `Delete note: ${note.text.slice(0, 40)}`);
   del.addEventListener("click", () => deleteNote(note.id));
 
   li.append(body, del);
@@ -108,16 +119,16 @@ function render() {
 
   list.replaceChildren();
 
-  if (notes.length > 0 && visibleNotes.length === 0) {
+  if (visibleNotes.length === 0) {
     const empty = document.createElement("li");
-    empty.classList.add("empty-message");
-    empty.textContent = "No notes match your search.";
+    empty.className = "empty-message";
+    empty.textContent = notes.length
+      ? "No notes match your search."
+      : "You have no notes yet.";
     list.appendChild(empty);
+  } else {
+    visibleNotes.forEach((note) => list.appendChild(createNoteElement(note)));
   }
-
-  visibleNotes.forEach((note) => {
-    list.appendChild(createNoteElement(note));
-  });
 
   count.textContent = countMessage(notes.length);
   clearAllBtn.hidden = notes.length === 0;
@@ -125,7 +136,7 @@ function render() {
 
 function addNote(text, category) {
   const note = {
-    id: Date.now(),
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     text,
     category,
     createdAt: new Date().toISOString(),
@@ -143,9 +154,12 @@ function deleteNote(id) {
 }
 
 function clearAll() {
-  if (!confirm("Delete all notes?")) return;
+  if (!notes.length) return;
+  if (!window.confirm("Delete all notes?")) return;
+
   notes = [];
   saveNotes();
+  showError("");
   render();
 }
 
@@ -153,7 +167,8 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const text = input.value.trim();
-  const error = validate(text);
+  const category = categorySelect.value;
+  const error = validate(text, category);
 
   if (error) {
     showError(error);
@@ -162,7 +177,7 @@ form.addEventListener("submit", (event) => {
   }
 
   showError("");
-  addNote(text, categorySelect.value);
+  addNote(text, category);
   input.value = "";
   input.focus();
 });
