@@ -16,9 +16,14 @@ function setStatus(message, type = "") {
 async function request(url, options = {}) {
   const response = await fetch(url, {
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      ...(options.headers || {})
     },
-    ...options
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
   });
 
   if (!response.ok) {
@@ -29,7 +34,7 @@ async function request(url, options = {}) {
 }
 
 function renderEmptyState() {
-  notesList.textContent = "";
+  notesList.replaceChildren();
   const empty = document.createElement("li");
   empty.textContent = "No notes found.";
   empty.className = "empty-state";
@@ -68,7 +73,7 @@ async function loadNotes() {
     const response = await request(`${API_URL}?_limit=10`);
     const notes = await response.json();
 
-    notesList.textContent = "";
+    notesList.replaceChildren();
 
     if (notes.length === 0) {
       renderEmptyState();
@@ -79,7 +84,6 @@ async function loadNotes() {
     setStatus(`Loaded ${notes.length} notes from the server.`, "success");
   } catch (error) {
     setStatus("Sorry, we could not load the notes. Please try again.", "error");
-    notesList.textContent = "";
     renderEmptyState();
   } finally {
     loadBtn.disabled = false;
@@ -120,6 +124,7 @@ async function createNote(event) {
     const note = await response.json();
     const emptyState = notesList.querySelector(".empty-state");
     if (emptyState) emptyState.remove();
+
     renderNote(note, true);
     setStatus(`Note created (status ${response.status}, id ${note.id}).`, "success");
     form.reset();
@@ -135,15 +140,15 @@ async function deleteNote(id, item, button) {
   setStatus("Deleting note...", "loading");
 
   try {
-    // JSONPlaceholder accepts DELETE requests but does not permanently store mutations.
     await request(`${API_URL}/${id}`, { method: "DELETE" });
     item.remove();
+
     if (!notesList.querySelector(".note")) {
       renderEmptyState();
     }
+
     setStatus(`Note ${id} deleted successfully.`, "success");
   } catch (error) {
-    button.disabled = false;
     setStatus("Sorry, we could not delete the note. Please try again.", "error");
   } finally {
     button.disabled = false;
