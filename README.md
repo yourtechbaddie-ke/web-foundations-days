@@ -11,7 +11,7 @@ Coursework repository for the Web Foundations course, organized by day and proje
 - `day5/` — Day 5 User Directory and Library API design
 - `day6/` — Day 6 data and storage work, including database design and SQL
 - `day7/` — Day 7 system design and scaling work
-- `day8/` — Day 8 capstone design and presentation work, when completed
+- `day8/` — Day 8 capstone design, ticketing system design, and reflection
 - `projects/` — Larger projects built from the course lessons
 
 ## Projects
