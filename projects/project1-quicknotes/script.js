@@ -19,6 +19,7 @@ let notes = loadNotes();
 function loadNotes() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return [];
+
   try {
     const parsed = JSON.parse(saved);
     return Array.isArray(parsed) ? parsed : [];
@@ -52,6 +53,18 @@ function countMessage(total) {
   return `You have ${total} notes.`;
 }
 
+function noteTime(note) {
+  if (typeof note.createdAt === "number") return note.createdAt;
+
+  const parsed = Date.parse(note.createdAt);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function displayDate(value) {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString();
+}
+
 function createNoteElement(note) {
   const li = document.createElement("li");
   li.classList.add("note", `category-${note.category}`);
@@ -71,7 +84,7 @@ function createNoteElement(note) {
   badge.textContent = capitalise(note.category);
 
   const date = document.createElement("span");
-  date.textContent = note.createdAt;
+  date.textContent = displayDate(note.createdAt);
 
   meta.append(badge, date);
   body.append(text, meta);
@@ -89,9 +102,9 @@ function createNoteElement(note) {
 function render() {
   const query = searchInput.value.trim().toLowerCase();
 
-  const visibleNotes = notes.filter((note) =>
-    note.text.toLowerCase().includes(query)
-  );
+  const visibleNotes = [...notes]
+    .sort((a, b) => noteTime(b) - noteTime(a))
+    .filter((note) => note.text.toLowerCase().includes(query));
 
   list.replaceChildren();
 
@@ -113,11 +126,12 @@ function render() {
 function addNote(text, category) {
   const note = {
     id: Date.now(),
-    text: text,
-    category: category,
-    createdAt: new Date().toLocaleString(),
+    text,
+    category,
+    createdAt: new Date().toISOString(),
   };
-  notes.unshift(note);
+
+  notes.push(note);
   saveNotes();
   render();
 }
