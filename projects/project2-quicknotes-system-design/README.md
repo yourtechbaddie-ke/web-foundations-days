@@ -1,73 +1,104 @@
 # QuickNotes System Design — Project 2
 
-QuickNotes is a browser API client and production-oriented system design for a note-taking service intended to scale to **1 million users**.
-
-This project has two halves:
-
-1. A small HTML/CSS/JavaScript client that demonstrates GET, POST and DELETE requests against the JSONPlaceholder practice API.
-2. Backend design documents covering the production REST API, relational data model and scalable architecture.
+QuickNotes is a browser API client plus a production-oriented system design for a note-taking service intended to scale to **1 million users**.
 
 ## Project structure
 
-    projects/project2-quicknotes-system-design/
-    ├── index.html
-    ├── api.js
-    ├── style.css
-    ├── README.md
-    └── docs/
-        ├── api-design.md
-        ├── data-model.md
-        └── architecture.md
+```text
+projects/project2-quicknotes-system-design/
+├── index.html
+├── api.js
+├── style.css
+├── README.md
+└── docs/
+    ├── api-design.md
+    ├── data-model.md
+    └── architecture.md
+```
 
-## How to run the API client
+## Part 1 — API client
 
-No backend installation is required for the practice client.
+The browser client uses the JSONPlaceholder practice API:
 
-1. Open the project folder in a browser-based editor or local development server.
-2. Open `index.html`.
-3. Click **Load notes** to fetch 10 notes from JSONPlaceholder.
-4. Use the form to create a note.
-5. Use a note's **Delete** button to send a DELETE request.
+`https://jsonplaceholder.typicode.com/posts`
 
-For the best browser experience, serve the project directory through a simple local HTTP server, for example:
+It demonstrates the required HTTP operations:
 
-    python -m http.server 8000
-
-Then open:
-
-    http://localhost:8000/projects/project2-quicknotes-system-design/
-
-The client uses:
-
-    https://jsonplaceholder.typicode.com/posts
+- **GET** `/posts?_limit=10` — loads 10 notes.
+- **POST** `/posts` — creates a note using `title`, `body` and `userId: 1`.
+- **DELETE** `/posts/{id}` — deletes the selected note.
 
 JSONPlaceholder is a practice API, so POST and DELETE mutations are simulated rather than permanently stored.
 
-## Design documents
+### Client behavior
 
-- [API Design](docs/api-design.md) — production REST endpoints, JSON examples and error handling.
-- [Data Model](docs/data-model.md) — users, notes, tags, note_tags, SQL schema, queries and indexes.
-- [Architecture](docs/architecture.md) — requirements, load estimates, scalable architecture, request flows and trade-offs.
-
-## API client features
-
-- GET loads 10 notes.
-- POST validates the title and creates a note.
-- DELETE removes a note from the current page after a successful request.
+- A reusable asynchronous `request()` helper uses `fetch()` and checks `response.ok`.
+- Network and HTTP errors are handled with `try/catch`.
+- `finally` re-enables controls after requests finish.
 - Loading, success, error and empty states are displayed.
-- Request buttons are disabled while their requests are running.
-- User-provided text is rendered with `textContent`, not `innerHTML`.
-- The title is required and limited to 100 characters.
+- The Load and Create buttons are disabled while their requests are running.
+- Delete buttons are disabled during deletion.
+- Titles are required and limited to **100 characters**.
+- User-provided note text is rendered with `textContent`, not `innerHTML`.
+- The UI never treats the practice API as a permanent local database.
+
+## How to run
+
+No backend installation is required for the practice client.
+
+1. Open this project in a browser-based editor or local development server.
+2. Open `index.html`.
+3. Click **Load notes**.
+4. Create a note with a title and optional body.
+5. Delete a displayed note and verify the success/error state.
+
+For the best browser experience, serve the repository through a local HTTP server, for example:
+
+```bash
+python -m http.server 8000
+```
+
+Then open:
+
+`http://localhost:8000/projects/project2-quicknotes-system-design/`
+
+## Part 2 — Production design
+
+The documentation covers the three required system-design areas:
+
+- [API Design](docs/api-design.md) — REST endpoints, methods, status codes, JSON examples, authentication and errors.
+- [Data Model](docs/data-model.md) — users, notes, tags, the `note_tags` many-to-many join table, SQL schema, indexes and queries.
+- [Architecture](docs/architecture.md) — 1-million-user load estimate, scalable architecture, request flows, failure handling and trade-offs.
+
+## Design summary
+
+### Data
+
+Use a relational database such as PostgreSQL.
+
+- `users` → one-to-many → `notes`
+- `users` → one-to-many → `tags`
+- `notes` ↔ many-to-many ↔ `tags` through `note_tags`
+
+### Scaling
+
+The workload is read-heavy, so the design uses:
+
+- horizontally scalable stateless application servers;
+- a load balancer;
+- Redis-style caching for hot note lists;
+- database read replicas;
+- a primary database for authoritative writes;
+- a durable queue and workers for asynchronous jobs;
+- CDN/WAF for cacheable static assets and edge protection;
+- monitoring, health checks, backups and failure recovery.
 
 ## What I learned
 
-1. **API clients need predictable request handling.** A reusable async `request()` function keeps fetch error handling consistent and makes GET, POST and DELETE easier to maintain.
-2. **Frontend behavior should reflect API state.** Loading, success, error and empty states make asynchronous operations understandable to users, while disabling controls prevents duplicate requests.
-3. **Relational data modeling depends on relationships.** Users-to-notes and users-to-tags are one-to-many relationships, while notes-to-tags needs a `note_tags` join table for the many-to-many relationship.
-4. **Read-heavy systems need read optimization.** Caching, a CDN and a read replica reduce pressure on the primary database when reads greatly outnumber writes.
-5. **Asynchronous work improves request latency.** A durable queue and worker let background tasks happen outside the user-facing request path.
-6. **Scaling requires trade-offs.** Caching can introduce stale data, read replicas can lag, and queues introduce eventual consistency, so each scaling decision must be balanced against correctness and complexity.
-
-## Git history
-
-The project was built in meaningful increments covering the API client, API design, data model, architecture and README so each major part can be reviewed independently.
+1. API clients need predictable request handling and clear user-facing states.
+2. HTTP methods and status codes should communicate the operation clearly.
+3. Authentication identifies a user, while authorization enforces ownership.
+4. Many-to-many relationships require a join table in a normalized relational model.
+5. Read-heavy systems benefit from caching and read replicas.
+6. Queues keep slow background work outside the user-facing request path.
+7. Every scaling decision introduces trade-offs such as stale caches, replica lag and operational complexity.
